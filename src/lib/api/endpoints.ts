@@ -108,4 +108,20 @@ export const API_ENDPOINTS = {
     CHECK_IN: (id: number) => `/assignments/${id}/check-in`,
     CHECK_OUT: (id: number) => `/assignments/${id}/check-out`,
   },
+
+  // Payroll Entries (one per VERIFIED TimeLog, created via generate())
+  // Note: no PAY_PERIODS block here - GET /pay-periods 403s for the Employee
+  // role (no grant on that subject), so this Staff-facing feature reads pay
+  // period metadata (id/status/startDate/endDate) from the payPeriod relation
+  // nested on each PayrollEntry instead (payrollEntryInclude, backend-side).
+  PAYROLL_ENTRIES: {
+    BASE: '/payroll-entries',
+    BY_ID: (id: number) => `/payroll-entries/${id}`,
+    SUMMARY: '/payroll-entries/summary',
+  },
+
+  // Time Tracking (TimeLog records - check-in/out + manager verification)
+  TIME_TRACKING: {
+    BY_EMPLOYEE: (employeeId: number) => `/time-tracking/employee/${employeeId}`,
+  },
 } as const;

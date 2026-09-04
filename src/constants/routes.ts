@@ -15,6 +15,7 @@ import {
   UserCog,
   UserRound,
   CalendarPlus2,
+  Wallet,
 } from 'lucide-react';
 import React from 'react';
 
@@ -61,6 +62,12 @@ export const GENERAL_ROUTES: RouteConfig[] = [
     name: 'Điểm danh',
     breadcrumb: 'Điểm danh',
     icon: MapPinned,
+  },
+  {
+    path: '/income',
+    name: 'Thu nhập',
+    breadcrumb: 'Thu nhập',
+    icon: Wallet,
   },
   {
     path: '/profile',
