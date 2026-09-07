@@ -61,6 +61,10 @@ export const queryKeys = {
   taskTemplates: {
     byBranch: (branchId: number) => ["taskTemplates", "byBranch", branchId],
   },
+  tasks: {
+    byShift: (masterShiftId: number, subShiftId: number) =>
+      ["tasks", "byShift", masterShiftId, subShiftId],
+  },
   assignments: {
     all: () => ["assignments"],
     bySubShift: (subShiftId: number) => ["assignments", "bySubShift", subShiftId],
