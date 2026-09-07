@@ -4,7 +4,7 @@ import ScheduleTable from "./employeeScheduleView/scheduleTable";
 import { useGetEmployee } from "@/features/employee/hooks/useEmployeeQueries";
 import { useGetMasterShiftTemplatesByBranch } from "@/features/masterShiftTemplate/hooks/useMasterShiftTemplateQueries";
 import { useGetMasterShiftsByBranch } from "@/features/masterShift/hooks/useMasterShiftQueries";
-import { useGetAssignmentsByEmployee } from "@/features/assignment/hooks/useAssignmentQueries";
+import { useGetAvailabilityByEmployee } from "@/features/availability/hooks/useAvailabilityQueries";
 import { generateWeekdays, toDateOnlyString } from "@/lib/utils/dateTimeHelpers";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { use, useEffect, useMemo, useState } from "react";
@@ -40,14 +40,18 @@ export default function MyAvailabilityPage({
   const { data: masterShifts = [], isLoading: isFetchingShifts } =
     useGetMasterShiftsByBranch(selectedBranchId, from, to);
 
-  const { data: myAssignments = [], isLoading: isFetchingAssignments } =
-    useGetAssignmentsByEmployee(employeeId);
+  // Filtering by the route's employeeId works correctly for both self-view
+  // (backend keeps an Employee caller $self-scoped regardless of the id
+  // passed) and an Admin/Manager viewing a specific employee's page (backend
+  // filters to that employee) - confirmed against the live backend.
+  const { data: myAvailability = [], isLoading: isFetchingAvailability } =
+    useGetAvailabilityByEmployee(employeeId);
 
   const isLoading =
     isFetchingEmployee ||
     isFetchingTemplates ||
     isFetchingShifts ||
-    isFetchingAssignments;
+    isFetchingAvailability;
 
   if (!isFetchingEmployee && branches.length === 0) {
     return (
@@ -108,7 +112,7 @@ export default function MyAvailabilityPage({
               employeeId={employeeId}
               templates={templates}
               masterShifts={masterShifts}
-              myAssignments={myAssignments}
+              myAvailability={myAvailability}
               weekDays={weekDays}
             />
           </div>

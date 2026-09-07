@@ -120,6 +120,13 @@ export const API_ENDPOINTS = {
     CHECK_OUT: (id: number) => `/assignments/${id}/check-out`,
   },
 
+  // Availability (an employee registering interest in a SubShift, for a
+  // Manager to build a roster from - distinct from Assignment)
+  AVAILABILITY: {
+    BASE: '/availability',
+    BY_ID: (id: number) => `/availability/${id}`,
+  },
+
   // Payroll Entries (one per VERIFIED TimeLog, created via generate())
   // Note: no PAY_PERIODS block here - GET /pay-periods 403s for the Employee
   // role (no grant on that subject), so this Staff-facing feature reads pay

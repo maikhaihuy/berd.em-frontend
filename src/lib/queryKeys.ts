@@ -71,6 +71,12 @@ export const queryKeys = {
     byEmployee: (employeeId: number) => ["assignments", "byEmployee", employeeId],
     detail: (id: number) => ["assignments", "detail", id],
   },
+  availability: {
+    all: () => ["availability"],
+    bySubShift: (subShiftId: number) => ["availability", "bySubShift", subShiftId],
+    byEmployee: (employeeId: number) => ["availability", "byEmployee", employeeId],
+    mine: () => ["availability", "mine"],
+  },
   payrollEntries: {
     byEmployee: (employeeId: number) => ["payrollEntries", "byEmployee", employeeId],
     byPeriodAndEmployee: (payPeriodId: number, employeeId: number) =>

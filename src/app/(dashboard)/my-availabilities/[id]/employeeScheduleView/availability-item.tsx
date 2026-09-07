@@ -2,25 +2,23 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Assignment } from "@/features/assignment/types";
+import { Availability } from "@/features/availability/types";
 import { SubShiftLite } from "@/features/subShift/types";
 import {
-  useCreateAssignment,
-  useDeleteAssignment,
-} from "@/features/assignment/hooks/useAssignmentMutations";
+  useCreateAvailability,
+  useDeleteAvailability,
+} from "@/features/availability/hooks/useAvailabilityMutations";
 import { getTime } from "@/lib/utils/dateTimeHelpers";
-import { ClockCheck, ClockPlus, XCircle } from "lucide-react";
+import { ClockCheck, ClockPlus } from "lucide-react";
 
 const getStatusColor = (status?: string) => {
   switch (status) {
-    case "SCHEDULED":
+    case "REGISTERED":
       return "bg-orange-100 text-orange-800 border-orange-200";
-    case "IN_PROGRESS":
-      return "bg-blue-100 text-blue-800 border-blue-200";
-    case "COMPLETED":
+    case "ASSIGNED":
       return "bg-green-100 text-green-800 border-green-200";
-    case "ABSENT":
-      return "bg-red-100 text-red-800 border-red-200";
+    case "CANCELLED":
+      return "bg-gray-100 text-gray-800 border-gray-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }
@@ -28,58 +26,69 @@ const getStatusColor = (status?: string) => {
 
 const getStatusIcon = (status?: string) => {
   switch (status) {
-    case "COMPLETED":
+    case "ASSIGNED":
       return <ClockCheck className="h-3 w-3" />;
-    case "ABSENT":
-      return <XCircle className="h-3 w-3" />;
     default:
       return <ClockPlus className="h-3 w-3" />;
   }
 };
 
-export default function AssignmentItem({
+const getStatusLabel = (status?: Availability["status"]) => {
+  switch (status) {
+    case "REGISTERED":
+      return "Đã đăng ký, chờ xếp ca";
+    case "ASSIGNED":
+      return "Đã được xếp ca";
+    case "CANCELLED":
+      return "Đã hủy";
+    default:
+      return "Đã đăng ký, chờ xếp ca";
+  }
+};
+
+export default function AvailabilityItem({
   employeeId,
   subShift,
-  assignment,
+  availability,
 }: {
   employeeId: number;
   subShift: SubShiftLite;
-  assignment?: Assignment;
+  availability?: Availability;
 }) {
-  const { mutate: createAssignment, isPending: isRegistering } =
-    useCreateAssignment();
-  const { mutate: deleteAssignment, isPending: isUnregistering } =
-    useDeleteAssignment();
+  const { mutate: createAvailability, isPending: isRegistering } =
+    useCreateAvailability();
+  const { mutate: deleteAvailability, isPending: isUnregistering } =
+    useDeleteAvailability();
 
-  // Once a shift has actually started/finished (or the employee no-showed),
-  // the registration is locked - only a SCHEDULED (not-yet-started) one can
-  // still be unregistered.
-  const canUnregister = assignment?.status === "SCHEDULED";
+  // ASSIGNED means a Manager has already built a real shift around this
+  // registration - unregistering past that point is a change-request
+  // workflow, out of scope here, so only a REGISTERED row can be undone.
+  const canUnregister = availability?.status === "REGISTERED";
 
   const handleRegister = () => {
-    createAssignment({ employeeId, subShiftId: subShift.id });
+    createAvailability({ employeeId, subShiftId: subShift.id });
   };
 
   const handleUnregister = () => {
-    if (!assignment) return;
-    deleteAssignment(assignment.id);
+    if (!availability) return;
+    deleteAvailability(availability.id);
   };
 
   return (
     <div className="space-y-2 flex flex-col justify-center">
       <Badge
         className={`w-full flex-row justify-center gap-1 p-2 ${getStatusColor(
-          assignment?.status
+          availability?.status
         )}`}
       >
-        {getStatusIcon(assignment?.status)}
+        {getStatusIcon(availability?.status)}
         <span>
           {getTime(new Date(subShift.startTime))} -{" "}
           {getTime(new Date(subShift.endTime))}
         </span>
       </Badge>
       <div className="w-full flex flex-row justify-center gap-2">
-        {!assignment ? (
+        {!availability ? (
           <Button
             size="sm"
             variant="outline"
@@ -101,7 +110,7 @@ export default function AssignmentItem({
           </Button>
         ) : (
           <div className="text-xs text-muted-foreground text-center py-1 px-2">
-            {assignment.status} - View only
+            {getStatusLabel(availability.status)}
           </div>
         )}
       </div>
