@@ -6,9 +6,12 @@ import { useGetEmployee } from "@/features/employee/hooks/useEmployeeQueries";
 import { useGetAssignmentsByEmployee } from "@/features/assignment/hooks/useAssignmentQueries";
 import { taskTemplateService } from "@/features/taskTemplate/services/taskTemplate.service";
 import { TaskTemplate } from "@/features/taskTemplate/types";
+import { taskService } from "@/features/task/services/task.service";
+import { Task } from "@/features/task/types";
 import { queryKeys } from "@/lib/queryKeys";
 import { toDateOnlyString } from "@/lib/utils/dateTimeHelpers";
 import { TodayShiftCard } from "./today-shift-card";
+import { LiveClock } from "./live-clock";
 import { CalendarX2, Loader2, MapPinned } from "lucide-react";
 
 export default function AttendanceTrackingPage() {
@@ -46,6 +49,27 @@ export default function AttendanceTrackingPage() {
     taskTemplatesByBranch[branchId] = taskTemplateQueries[index]?.data ?? [];
   });
 
+  // One tasks query per assignment's (masterShiftId, subShiftId) slot - each
+  // today's assignment already targets its own subShift, so no further
+  // dedup is needed. taskService.listForShift issues two requests and merges
+  // them (masterShiftId and subShiftId can't be queried together - see
+  // task.service.ts).
+  const taskQueries = useQueries({
+    queries: todaysAssignments.map((assignment) => {
+      const masterShiftId = assignment.subShift?.masterShift?.id;
+      const subShiftId = assignment.subShift?.id;
+      return {
+        queryKey: queryKeys.tasks.byShift(masterShiftId ?? 0, subShiftId ?? 0),
+        queryFn: () => taskService.listForShift(masterShiftId!, subShiftId!),
+        enabled: !!masterShiftId && !!subShiftId,
+      };
+    }),
+  });
+  const tasksByAssignmentId: Record<number, Task[]> = {};
+  todaysAssignments.forEach((assignment, index) => {
+    tasksByAssignmentId[assignment.id] = taskQueries[index]?.data ?? [];
+  });
+
   const branchNameById = Object.fromEntries(
     (employee?.branches ?? []).map((branch) => [branch.id, branch.name])
   );
@@ -68,7 +92,10 @@ export default function AttendanceTrackingPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <h2 className="text-2xl font-bold text-foreground">Điểm danh</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-2xl font-bold text-foreground">Điểm danh</h2>
+        <LiveClock />
+      </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
@@ -89,6 +116,7 @@ export default function AttendanceTrackingPage() {
                 key={assignment.id}
                 assignment={assignment}
                 branchName={(branchId && branchNameById[branchId]) || "Chi nhánh"}
+                tasks={tasksByAssignmentId[assignment.id] ?? []}
                 taskTemplates={(branchId && taskTemplatesByBranch[branchId]) || []}
               />
             );

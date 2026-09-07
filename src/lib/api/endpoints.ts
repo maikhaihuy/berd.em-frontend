@@ -101,6 +101,17 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number) => `/task-templates/${id}`,
   },
 
+  // Tasks (a per-shift task instance, created from a TaskTemplate upstream of
+  // this app - shared tasks carry masterShiftId, dedicated tasks carry
+  // subShiftId, never both, so GET /tasks must be queried by one param at a
+  // time, never both together - see wire-task-completion-and-checkout-gate's
+  // design.md Decision 3)
+  TASKS: {
+    BASE: '/tasks',
+    BY_ID: (id: number) => `/tasks/${id}`,
+    COMPLETE: (id: number) => `/tasks/${id}/complete`,
+  },
+
   // Assignments (an employee assigned to a SubShift)
   ASSIGNMENTS: {
     BASE: '/assignments',
