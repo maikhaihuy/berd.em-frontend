@@ -58,6 +58,12 @@ export const GENERAL_ROUTES: RouteConfig[] = [
     icon: CalendarCheck,
   },
   {
+    path: '/my-shift-history',
+    name: 'Lịch sử ca',
+    breadcrumb: 'Lịch sử ca',
+    icon: History,
+  },
+  {
     path: '/attendanceTracking',
     name: 'Điểm danh',
     breadcrumb: 'Điểm danh',
