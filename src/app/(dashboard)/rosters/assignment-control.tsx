@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/select";
 import { useCreateAssignment } from "@/features/assignment/hooks/useAssignmentMutations";
 import { cn } from "@/lib/utils/cn";
-import { Check, X } from "lucide-react";
+import { Check, CircleDot, X } from "lucide-react";
 
 interface AssignmentControlProps {
   subShiftId: number;
   currentId?: number;
-  items: { id: number; fullName: string }[];
+  items: { id: number; fullName: string; isAvailable?: boolean }[];
   placeholder?: string;
   warning?: boolean;
   className?: string;
@@ -76,7 +76,12 @@ export function AssignmentControl({
         <SelectContent>
           {items.map((item) => (
             <SelectItem key={item.id} value={String(item.id)}>
-              {item.fullName}
+              <span className="flex items-center gap-1.5">
+                {item.isAvailable && (
+                  <CircleDot className="h-3 w-3 text-green-600" aria-label="Đã đăng ký ca này" />
+                )}
+                {item.fullName}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>

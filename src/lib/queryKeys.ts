@@ -75,6 +75,7 @@ export const queryKeys = {
     all: () => ["availability"],
     bySubShift: (subShiftId: number) => ["availability", "bySubShift", subShiftId],
     byEmployee: (employeeId: number) => ["availability", "byEmployee", employeeId],
+    byBranch: (branchId: number, date: string) => ["availability", "byBranch", branchId, date],
     mine: () => ["availability", "mine"],
   },
   payrollEntries: {

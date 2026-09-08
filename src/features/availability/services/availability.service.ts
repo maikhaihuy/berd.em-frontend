@@ -15,5 +15,5 @@ export const availabilityService = {
   // filtered employee's rows - so this is safe to use for the "view another
   // employee's registrations" case too, not just self-view.
   listByEmployee: (employeeId: number) => base.list({ employeeId }),
-  // listByBranch added in Spec 3, once the backend supports the branchId filter.
+  listByBranch: (branchId: number, date: string) => base.list({ branchId, date }),
 };

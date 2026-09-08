@@ -28,3 +28,10 @@ export const useGetAvailabilityByEmployee = (employeeId: number) =>
     () => availabilityService.listByEmployee(employeeId),
     { enabled: !!employeeId }
   );
+
+export const useGetAvailabilityByBranch = (branchId: number, date: string) =>
+  useAppQuery<Availability[]>(
+    queryKeys.availability.byBranch(branchId, date),
+    () => availabilityService.listByBranch(branchId, date),
+    { enabled: !!branchId }
+  );

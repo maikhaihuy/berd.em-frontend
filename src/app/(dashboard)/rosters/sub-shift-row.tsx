@@ -7,6 +7,7 @@ import { AssignmentChip } from "./assignment-chip";
 import { AssignmentControl } from "./assignment-control";
 import { SubShiftLite } from "@/features/subShift/types";
 import { useGetAssignmentsBySubShift } from "@/features/assignment/hooks/useAssignmentQueries";
+import { useGetAvailabilityBySubShift } from "@/features/availability/hooks/useAvailabilityQueries";
 import { useGetEmployees } from "@/features/employee/hooks";
 import { getTime } from "@/lib/utils/dateTimeHelpers";
 import { cn } from "@/lib/utils/cn";
@@ -19,6 +20,7 @@ interface SubShiftRowProps {
 
 export function SubShiftRow({ branchId, subShift }: SubShiftRowProps) {
   const { data: assignments = [] } = useGetAssignmentsBySubShift(subShift.id);
+  const { data: availability = [] } = useGetAvailabilityBySubShift(subShift.id);
   const { data: employees = [] } = useGetEmployees();
   const [adding, setAdding] = useState(false);
 
@@ -30,7 +32,15 @@ export function SubShiftRow({ branchId, subShift }: SubShiftRowProps) {
   );
   const eligibleIds = new Set(eligibleEmployees.map((e) => e.id));
   const assignedIds = new Set(assignments.map((a) => a.employeeId));
-  const availableForNewPick = eligibleEmployees.filter((e) => !assignedIds.has(e.id));
+  const registeredIds = new Set(
+    availability.filter((a) => a.status === "REGISTERED").map((a) => a.employeeId)
+  );
+  // Registered employees sorted ahead of unregistered ones - purely visual,
+  // doesn't affect which employees are selectable.
+  const availableForNewPick = eligibleEmployees
+    .filter((e) => !assignedIds.has(e.id))
+    .map((e) => ({ ...e, isAvailable: registeredIds.has(e.id) }))
+    .sort((a, b) => Number(b.isAvailable) - Number(a.isAvailable));
 
   const maxAssignments = subShift.maxAssignments;
   const isUnassigned = assignments.length === 0;
@@ -41,7 +51,11 @@ export function SubShiftRow({ branchId, subShift }: SubShiftRowProps) {
   const singleAssignment = !isMulti ? assignments[0] : undefined;
   const singleModeItems = singleAssignment
     ? [
-        { id: singleAssignment.employeeId, fullName: singleAssignment.employee?.fullName ?? "Unknown" },
+        {
+          id: singleAssignment.employeeId,
+          fullName: singleAssignment.employee?.fullName ?? "Unknown",
+          isAvailable: registeredIds.has(singleAssignment.employeeId),
+        },
         ...availableForNewPick,
       ]
     : availableForNewPick;
